@@ -12,17 +12,13 @@ class CritiqueResponse(BaseModel):
     critique: str
     sources: list
 
-# Initialize chain lazily or on startup
-rag_chain = None
-
-@app.on_event("startup")
-async def startup_event():
-    global rag_chain
-    try:
-        rag_chain = get_rag_chain()
-        print("RAG Chain initialized successfully.")
-    except Exception as e:
-        print(f"Error initializing RAG Chain: {e}")
+# Initialize chain at module level
+try:
+    rag_chain = get_rag_chain()
+    print("RAG Chain initialized successfully.")
+except Exception as e:
+    print(f"Error initializing RAG Chain: {e}")
+    rag_chain = None
 
 @app.post("/critique", response_model=CritiqueResponse)
 async def generate_critique(request: CritiqueRequest):
@@ -42,4 +38,4 @@ async def generate_critique(request: CritiqueRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":
-    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=True)
+    uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=False, loop="asyncio")

@@ -1,34 +1,14 @@
 from langchain_community.llms import Ollama
 from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_core.prompts import ChatPromptTemplate
+from langchain_core.runnables import RunnablePassthrough
+from langchain_community.embeddings import OllamaEmbeddings
 
 DB_PATH = "data/chroma_db"
 
-class ManualRAG:
-    def __init__(self, llm, retriever, template):
-        self.llm = llm
-        self.retriever = retriever
-        self.template = template
-
-    def invoke(self, inputs):
-        query = inputs.get("input") or inputs.get("query")
-        # get_relevant_documents is deprecated in favor of invoke, but let's use invoke if available or get_relevant_documents
-        try:
-            docs = self.retriever.invoke(query)
-        except:
-            docs = self.retriever.get_relevant_documents(query)
-            
-        context = "\n\n".join([d.page_content for d in docs])
-        prompt_text = self.template.format(context=context, input=query)
-        
-        # Ollama invoke returns string usually
-        response = self.llm.invoke(prompt_text)
-        
-        return {"answer": response, "context": docs}
-
 def get_rag_chain():
-    # 1. Initialize Embeddings
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    # 1. Initialize Embeddings using Ollama
+    embeddings = OllamaEmbeddings(model="mxbai-embed-large")
 
     # 2. Load Vector Store
     vectorstore = Chroma(persist_directory=DB_PATH, embedding_function=embeddings)
@@ -53,5 +33,13 @@ def get_rag_chain():
     
     Critique:
     """
+    prompt = ChatPromptTemplate.from_template(template)
+
+    # 5. Create Chain using the modern LCEL syntax
+    rag_chain = (
+        {"context": retriever, "input": RunnablePassthrough()}
+        | prompt
+        | llm
+    )
     
-    return ManualRAG(llm, retriever, template)
+    return rag_chain
