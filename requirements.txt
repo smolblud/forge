@@ -1,8 +1,20 @@
-fastapi
-uvicorn
-langchain
-langchain-community
-langchain-huggingface
-chromadb
-sentence-transformers
-pydantic
+# Core Framework
+fastapi>=0.104.1
+uvicorn[standard]>=0.24.0
+
+# LangChain
+langchain>=0.1.0
+langchain-community>=0.0.14
+langchain-core>=0.1.0
+
+# Vector Database
+chromadb>=0.4.18
+
+# Ollama
+ollama>=0.1.7
+
+# Data Validation
+pydantic>=2.5.0
+
+# Optional: For file uploads in FastAPI
+python-multipart>=0.0.6
