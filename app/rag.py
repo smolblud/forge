@@ -1,7 +1,7 @@
 from langchain_community.llms import Ollama
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
-from langchain_core.runnables import RunnablePassthrough
+from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_community.embeddings import OllamaEmbeddings
 
 DB_PATH = "data/chroma_db"
@@ -35,11 +35,18 @@ def get_rag_chain():
     """
     prompt = ChatPromptTemplate.from_template(template)
 
-    # 5. Create Chain using the modern LCEL syntax
-    rag_chain = (
-        {"context": retriever, "input": RunnablePassthrough()}
+    # 5. Create Chain using LCEL
+    def format_docs(docs):
+        return "\n\n".join(doc.page_content for doc in docs)
+
+    rag_chain_from_docs = (
+        RunnablePassthrough.assign(context=(lambda x: format_docs(x["context"])))
         | prompt
         | llm
     )
+
+    rag_chain_with_source = RunnableParallel(
+        {"context": retriever, "input": RunnablePassthrough()}
+    ).assign(answer=rag_chain_from_docs)
     
-    return rag_chain
+    return rag_chain_with_source

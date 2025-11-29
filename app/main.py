@@ -26,8 +26,8 @@ async def generate_critique(request: CritiqueRequest):
         raise HTTPException(status_code=500, detail="RAG Chain not initialized")
     
     try:
-        # The new retrieval chain expects 'input'.
-        response = rag_chain.invoke({"input": request.text})
+        # The new retrieval chain expects 'input' as string (passed via RunnablePassthrough)
+        response = rag_chain.invoke(request.text)
         
         critique = response['answer']
         source_docs = response.get('context', [])

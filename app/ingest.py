@@ -1,7 +1,7 @@
 import json
 import os
 from langchain_community.vectorstores import Chroma
-from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_ollama.embeddings import OllamaEmbeddings
 from langchain_core.documents import Document
 
 DATA_PATH = "data/guides.json"
@@ -27,7 +27,7 @@ def ingest():
     print(f"Loaded {len(documents)} documents.")
 
     print("Initializing embeddings...")
-    embeddings = HuggingFaceEmbeddings(model_name="all-MiniLM-L6-v2")
+    embeddings = OllamaEmbeddings(model="mxbai-embed-large")
 
     print("Creating/Updating Vector Store...")
     vectorstore = Chroma.from_documents(
