@@ -2,19 +2,19 @@
 
 Forge is a 100% offline, local-first AI writing coach designed to help users improve their writing through constructive critique and feedback. It leverages Retrieval-Augmented Generation (RAG) to provide context-aware advice based on a library of writing guides, all running locally on your machine using Ollama.
 
-## 🚀 Features
+## Features
 
 *   **Local-First & Private**: Runs entirely on your device. No data leaves your machine.
 *   **AI Writing Coach**: Uses the Phi-3 model (via Ollama) to analyze text and offer improvements.
 *   **RAG-Powered**: Retrieves relevant writing advice from a local knowledge base (ChromaDB) to ground its feedback.
 *   **FastAPI Backend**: A lightweight and fast API to interact with the agent.
 
-## 🛠️ Prerequisites
+## Prerequisites
 
 *   **Python 3.10+**
 *   **[Ollama](https://ollama.com/)**: Must be installed and running.
 
-## 📦 Installation
+## Installation
 
 1.  **Clone the repository** (if applicable) or navigate to the project directory.
 
@@ -38,7 +38,7 @@ Forge is a 100% offline, local-first AI writing coach designed to help users imp
     ollama pull mxbai-embed-large
     ```
 
-## 🏃‍♂️ Usage
+## Usage
 
 ### 1. Ingest Knowledge Base
 First, you need to populate the local vector database with writing guides.
@@ -65,7 +65,7 @@ curl -X POST "http://127.0.0.1:8000/critique" \
      -d '{"text": "He was very angry and said loudly that he wanted to leave."}'
 ```
 
-## ww Project Structure
+## Project Structure
 
 *   `app/`: Contains the application source code.
     *   `main.py`: FastAPI entry point.
