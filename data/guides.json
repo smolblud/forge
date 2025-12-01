@@ -1,22 +1,246 @@
 [
-    {
-        "title": "Show, Don't Tell",
-        "content": "Instead of stating a character's emotion, describe their actions and physical reactions. For example, instead of 'He was angry', write 'He clenched his fists and his face turned red'."
-    },
-    {
-        "title": "Active Voice",
-        "content": "Use the active voice to make your sentences stronger and more direct. In active voice, the subject performs the action. Passive: 'The ball was thrown by the boy.' Active: 'The boy threw the ball.'"
-    },
-    {
-        "title": "Vary Sentence Length",
-        "content": "Mix short and long sentences to create rhythm and keep the reader engaged. Short sentences add punch. Long sentences add flow."
-    },
-    {
-        "title": "Avoid Adverbs",
-        "content": "Strong verbs are better than weak verbs with adverbs. Instead of 'ran quickly', use 'sprinted'. Instead of 'said loudly', use 'shouted'."
-    },
-    {
-        "title": "Kill Your Darlings",
-        "content": "Be willing to cut scenes or characters that don't serve the story, even if you love them. Every element must advance the plot or reveal character."
-    }
+  {
+    "title": "Show, Don't Tell",
+    "content": "Instead of stating a character's emotion, describe their actions and physical reactions. For example, instead of 'He was angry', write 'He clenched his fists and his face turned red'."
+  },
+  {
+    "title": "Active Voice",
+    "content": "Use the active voice to make your sentences stronger and more direct. In active voice, the subject performs the action. Passive: 'The ball was thrown by the boy.' Active: 'The boy threw the ball.'"
+  },
+  {
+    "title": "Vary Sentence Length",
+    "content": "Mix short and long sentences to create rhythm and keep the reader engaged. Short sentences add punch. Long sentences add flow."
+  },
+  {
+    "title": "Avoid Adverbs",
+    "content": "Strong verbs are better than weak verbs with adverbs. Instead of 'ran quickly', use 'sprinted'. Instead of 'said loudly', use 'shouted'."
+  },
+  {
+    "title": "Kill Your Darlings",
+    "content": "Be willing to cut scenes or characters that don't serve the story, even if you love them. Every element must advance the plot or reveal character."
+  },
+  {
+    "title": "Untitled",
+    "content": "query"
+  },
+  {
+    "title": "Untitled",
+    "content": "follow_up_questions"
+  },
+  {
+    "title": "Untitled",
+    "content": "answer"
+  },
+  {
+    "title": "Untitled",
+    "content": "images"
+  },
+  {
+    "title": "Untitled",
+    "content": "results"
+  },
+  {
+    "title": "Untitled",
+    "content": "response_time"
+  },
+  {
+    "title": "Untitled",
+    "content": "request_id"
+  },
+  {
+    "title": "Untitled",
+    "content": "query"
+  },
+  {
+    "title": "Untitled",
+    "content": "follow_up_questions"
+  },
+  {
+    "title": "Untitled",
+    "content": "answer"
+  },
+  {
+    "title": "Untitled",
+    "content": "images"
+  },
+  {
+    "title": "Untitled",
+    "content": "results"
+  },
+  {
+    "title": "Untitled",
+    "content": "response_time"
+  },
+  {
+    "title": "Untitled",
+    "content": "request_id"
+  },
+  {
+    "title": "Untitled",
+    "content": "query"
+  },
+  {
+    "title": "Untitled",
+    "content": "follow_up_questions"
+  },
+  {
+    "title": "Untitled",
+    "content": "answer"
+  },
+  {
+    "title": "Untitled",
+    "content": "images"
+  },
+  {
+    "title": "Untitled",
+    "content": "results"
+  },
+  {
+    "title": "Untitled",
+    "content": "response_time"
+  },
+  {
+    "title": "Untitled",
+    "content": "request_id"
+  },
+  {
+    "title": "Untitled",
+    "content": "query"
+  },
+  {
+    "title": "Untitled",
+    "content": "follow_up_questions"
+  },
+  {
+    "title": "Untitled",
+    "content": "answer"
+  },
+  {
+    "title": "Untitled",
+    "content": "images"
+  },
+  {
+    "title": "Untitled",
+    "content": "results"
+  },
+  {
+    "title": "Untitled",
+    "content": "response_time"
+  },
+  {
+    "title": "Untitled",
+    "content": "request_id"
+  },
+  {
+    "title": "Untitled",
+    "content": "query"
+  },
+  {
+    "title": "Untitled",
+    "content": "follow_up_questions"
+  },
+  {
+    "title": "Untitled",
+    "content": "answer"
+  },
+  {
+    "title": "Untitled",
+    "content": "images"
+  },
+  {
+    "title": "Untitled",
+    "content": "results"
+  },
+  {
+    "title": "Untitled",
+    "content": "response_time"
+  },
+  {
+    "title": "Untitled",
+    "content": "request_id"
+  },
+  {
+    "title": "Untitled",
+    "content": "query"
+  },
+  {
+    "title": "Untitled",
+    "content": "follow_up_questions"
+  },
+  {
+    "title": "Untitled",
+    "content": "answer"
+  },
+  {
+    "title": "Untitled",
+    "content": "images"
+  },
+  {
+    "title": "Untitled",
+    "content": "results"
+  },
+  {
+    "title": "Untitled",
+    "content": "response_time"
+  },
+  {
+    "title": "Untitled",
+    "content": "request_id"
+  },
+  {
+    "title": "Untitled",
+    "content": "query"
+  },
+  {
+    "title": "Untitled",
+    "content": "follow_up_questions"
+  },
+  {
+    "title": "Untitled",
+    "content": "answer"
+  },
+  {
+    "title": "Untitled",
+    "content": "images"
+  },
+  {
+    "title": "Untitled",
+    "content": "results"
+  },
+  {
+    "title": "Untitled",
+    "content": "response_time"
+  },
+  {
+    "title": "Untitled",
+    "content": "request_id"
+  },
+  {
+    "title": "Untitled",
+    "content": "query"
+  },
+  {
+    "title": "Untitled",
+    "content": "follow_up_questions"
+  },
+  {
+    "title": "Untitled",
+    "content": "answer"
+  },
+  {
+    "title": "Untitled",
+    "content": "images"
+  },
+  {
+    "title": "Untitled",
+    "content": "results"
+  },
+  {
+    "title": "Untitled",
+    "content": "response_time"
+  },
+  {
+    "title": "Untitled",
+    "content": "request_id"
+  }
 ]

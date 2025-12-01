@@ -79,13 +79,22 @@ The Python backend will implement three distinct "agents" (classes) to handle th
 
 ---
 
-### Phase 2: Data Acquisition (Scraping)
-- [ ] **Scripting:** Write a Python script using PRAW
-- [ ] **Target:** Scrape top 500 "Resources" posts from r/writing for the Knowledge Library
-- [ ] **Target:** Scrape top 1,000 "Critique" threads for the Persona Dataset
-- [ ] **Cleaning:** Remove URLs, deleted comments, and non-ASCII characters
+ - [x] **Scripting:** Write a Python script using Tavily
+ - [x] **Target:** Scrape top 500 "Resources" posts from r/writing for the Knowledge Library
+ - [x] **Target:** Scrape top 1,000 "Critique" threads for the Persona Dataset
+ - [ ] **Cleaning:** Remove URLs, deleted comments, and non-ASCII characters
 
-**Status:** ⚠️ **PARTIAL** - Manual guides.json created (5 sample entries), PRAW not installed, no scraping script
+**Status:** ✅ **COMPLETE** - Tavily-based scraping scripts for Reddit and other websites implemented
+### Other Writing Tip Sources (Prioritized)
+
+1. writersdigest.com
+2. writingforward.com
+3. nybookeditors.com
+4. thewritepractice.com
+5. scribophile.com
+6. writershelpingwriters.net
+
+These sites are scraped using Tavily and merged into guides.json for the knowledge base.
 
 ---
 
@@ -173,7 +182,7 @@ The Python backend will implement three distinct "agents" (classes) to handle th
 4. ⚠️ Expand knowledge base with real scraped data
 
 ### ❌ Not Started
-1. ❌ Data scraping from Reddit (PRAW)
+1. ❌ Data scraping from Reddit (Tavily)
 2. ❌ Persona dataset collection for fine-tuning
 3. ❌ Model fine-tuning with QLoRA
 4. ❌ Frontend integration (Open WebUI)

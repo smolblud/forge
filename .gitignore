@@ -19,3 +19,4 @@ env/
 data/chroma_db/
 debug_*.py
 .github/copilot-instructions.md
+data/raw_scraped_data/
