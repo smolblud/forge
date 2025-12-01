@@ -111,16 +111,18 @@ These sites are scraped using Tavily and merged into guides.json for the knowled
 
 ---
 
+
 ### Phase 4: Fine-Tuning (The Persona)
 - [x] **Preparation:** Convert "Persona Dataset" to JSONL format compatible with QLoRA
-- [ ] **Training:** Use Unsloth or AutoTrain libraries in Colab
+- [ ] **Training:** Use Unsloth or AutoTrain libraries locally (not Colab)
   - [ ] Base Model: Phi-3-mini
   - [ ] Technique: QLoRA (4-bit)
   - [ ] Prompt Template: "Below is a writing submission. Provide a critique."
+  - [ ] Use `.venv` and install dependencies with `uv pip install ...`
 - [ ] **Export:** Save the adapter weights (adapter.safetensors)
 - [ ] **Conversion:** Convert adapter to GGUF format and import into Ollama as a "Modelfile"
 
-**Status:** ⚠️ **PARTIAL** - Persona dataset created with 100 examples, ready for fine-tuning
+**Status:** ⚠️ **PARTIAL** - Persona dataset created with 100 examples, ready for local fine-tuning
 
 ---
 
