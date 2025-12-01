@@ -112,7 +112,7 @@ These sites are scraped using Tavily and merged into guides.json for the knowled
 ---
 
 ### Phase 4: Fine-Tuning (The Persona)
-- [ ] **Preparation:** Convert "Persona Dataset" to JSONL format compatible with QLoRA
+- [x] **Preparation:** Convert "Persona Dataset" to JSONL format compatible with QLoRA
 - [ ] **Training:** Use Unsloth or AutoTrain libraries in Colab
   - [ ] Base Model: Phi-3-mini
   - [ ] Technique: QLoRA (4-bit)
@@ -120,7 +120,7 @@ These sites are scraped using Tavily and merged into guides.json for the knowled
 - [ ] **Export:** Save the adapter weights (adapter.safetensors)
 - [ ] **Conversion:** Convert adapter to GGUF format and import into Ollama as a "Modelfile"
 
-**Status:** ❌ **NOT STARTED** - Depends on Phase 2 data collection
+**Status:** ⚠️ **PARTIAL** - Persona dataset created with 100 examples, ready for fine-tuning
 
 ---
 
@@ -175,18 +175,21 @@ These sites are scraped using Tavily and merged into guides.json for the knowled
 5. ✅ Ingest script for vectorizing documents
 6. ✅ Ollama integration with Phi-3
 
+### ✅ Completed
+7. ✅ Data scraping from Reddit and writing websites (Tavily-based)
+8. ✅ Knowledge base populated with cleaned writing tips (guides.json)
+9. ✅ ChromaDB vector database created via ingest.py
+10. ✅ Persona dataset created (100 critique examples in persona_dataset.json)
+
 ### ⚠️ In Progress / Needs Work
-1. ⚠️ Run ingest.py to create ChromaDB vector database
-2. ⚠️ Implement 3-agent architecture (Planner, Librarian, Coach)
-3. ⚠️ Add output guardrails and rewrite detection
-4. ⚠️ Expand knowledge base with real scraped data
+1. ⚠️ Implement 3-agent architecture (Planner, Librarian, Coach)
+2. ⚠️ Add output guardrails and rewrite detection
+3. ⚠️ Test RAG pipeline end-to-end
 
 ### ❌ Not Started
-1. ❌ Data scraping from Reddit (Tavily)
-2. ❌ Persona dataset collection for fine-tuning
-3. ❌ Model fine-tuning with QLoRA
-4. ❌ Frontend integration (Open WebUI)
-5. ❌ End-to-end testing with UI
+1. ❌ Model fine-tuning with QLoRA using persona dataset
+2. ❌ Frontend integration (Open WebUI)
+3. ❌ End-to-end testing with UI
 
 ---
 
