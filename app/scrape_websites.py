@@ -36,7 +36,7 @@ def scrape_web_writing_tips():
                     timeout=30
                 )
                 # Save raw results for inspection
-                raw_path = f"data/raw_web_{site.replace('.', '_')}_{query.replace(' ', '_')}.json"
+                raw_path = f"data/raw_scraped_dataraw_web_{site.replace('.', '_')}_{query.replace(' ', '_')}.json"
                 with open(raw_path, "w") as rawf:
                     json.dump(results, rawf, indent=2)
                 # Filter and sanitize results
