@@ -183,8 +183,9 @@ These sites are scraped using Tavily and merged into guides.json for the knowled
 10. ✅ Persona dataset created (100 critique examples in persona_dataset.json)
 
 
-### ⚠️ In Progress / Needs Work
-1. 🚧 Test RAG pipeline end-to-end (IN PROGRESS)
+
+### ✅ Backend Implementation Complete
+1. ✅ Test RAG pipeline end-to-end
 2. ✅ Implement 3-agent architecture (Planner, Librarian, Coach)
 3. ✅ Add output guardrails and rewrite detection
 
@@ -196,11 +197,11 @@ These sites are scraped using Tavily and merged into guides.json for the knowled
 ---
 
 
+
 ## 🎯 Next Steps (Priority Order)
 
-1. 🚧 **Test the RAG pipeline end-to-end** using the populated guides.json and ChromaDB (IN PROGRESS)
-2. ✅ **Implement the 3-agent architecture** (Planner → Librarian → Coach) in the FastAPI backend
-3. ✅ **Add output guardrails** to prevent text rewriting and ensure critique-only responses
-4. **Expand and refine the persona dataset for future fine-tuning**
-5. **Begin frontend integration** (Open WebUI) and connect to the API
-6. **Document and validate the system with real user queries**
+1. **Expand and refine the persona dataset for future fine-tuning**
+2. **Model fine-tuning with QLoRA using persona dataset**
+3. **Begin frontend integration** (Open WebUI) and connect to the API
+4. **End-to-end testing with UI and real user queries**
+5. **Document and validate the system**
