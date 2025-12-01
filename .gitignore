@@ -18,3 +18,4 @@ env/
 # Project Specific
 data/chroma_db/
 debug_*.py
+.github/copilot-instructions.md
