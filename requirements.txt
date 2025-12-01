@@ -21,3 +21,6 @@ python-multipart>=0.0.6
 
 # For loading environment variables from .env
 python-dotenv>=1.0.0
+
+# For scraping and cleaning
+tavily>=0.2.0

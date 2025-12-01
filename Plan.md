@@ -82,9 +82,9 @@ The Python backend will implement three distinct "agents" (classes) to handle th
  - [x] **Scripting:** Write a Python script using Tavily
  - [x] **Target:** Scrape top 500 "Resources" posts from r/writing for the Knowledge Library
  - [x] **Target:** Scrape top 1,000 "Critique" threads for the Persona Dataset
- - [ ] **Cleaning:** Remove URLs, deleted comments, and non-ASCII characters
+ - [x] **Cleaning:** Remove URLs, deleted comments, and non-ASCII characters
 
-**Status:** ✅ **COMPLETE** - Tavily-based scraping scripts for Reddit and other websites implemented
+**Status:** ✅ **COMPLETE** - Tavily-based scraping scripts for Reddit and other websites implemented; cleaning and sanitization script working
 ### Other Writing Tip Sources (Prioritized)
 
 1. writersdigest.com
@@ -104,10 +104,10 @@ These sites are scraped using Tavily and merged into guides.json for the knowled
   - [x] Load "Knowledge Library" text files
   - [x] Split into chunks (RecursiveCharacterTextSplitter, chunk_size=500) - *Not implemented yet, using full documents*
   - [x] Embed chunks using OllamaEmbeddings (pointing to `mxbai-embed-large`)
-  - [ ] Store in ChromaDB - *Ingest script exists but DB not yet created*
+  - [x] Store in ChromaDB - *Ingest script and knowledge base population complete*
 - [x] **RAG Chain:** Basic RAG chain implemented in `app/rag.py`
 
-**Status:** ⚠️ **PARTIAL** - Code complete, needs to run `ingest.py` to create the vector database
+**Status:** ✅ **COMPLETE** - Knowledge base populated and ready for RAG
 
 ---
 
@@ -192,9 +192,9 @@ These sites are scraped using Tavily and merged into guides.json for the knowled
 
 ## 🎯 Next Steps (Priority Order)
 
-1. **Run the ingest script** to populate ChromaDB with existing guides
-2. **Test the basic RAG pipeline** to ensure it works end-to-end
-3. **Implement the 3-agent architecture** (Planner → Librarian → Coach)
-4. **Add guardrails** to prevent text rewriting
-5. **Set up data scraping** for larger knowledge base
-6. **Connect a UI layer** for user interaction
+1. **Test the RAG pipeline end-to-end** using the populated guides.json and ChromaDB
+2. **Implement the 3-agent architecture** (Planner → Librarian → Coach) in the FastAPI backend
+3. **Add output guardrails** to prevent text rewriting and ensure critique-only responses
+4. **Expand and refine the persona dataset for future fine-tuning**
+5. **Begin frontend integration** (Open WebUI) and connect to the API
+6. **Document and validate the system with real user queries**
