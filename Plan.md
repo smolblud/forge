@@ -200,10 +200,11 @@ These sites are scraped using Tavily and merged into guides.json for the knowled
 
 
 
+
 ## 🎯 Next Steps (Priority Order)
 
-1. **Expand and refine the persona dataset for future fine-tuning**
-2. **Model fine-tuning with QLoRA using persona dataset**
-3. **Begin frontend integration** (Open WebUI) and connect to the API
-4. **End-to-end testing with UI and real user queries**
-5. **Document and validate the system**
+1. **Begin frontend integration** (Open WebUI) and connect to the API
+2. **Add and refine output guardrails in backend**
+3. **End-to-end testing and validation with UI and real user queries**
+4. **Document the system and collect feedback**
+5. **Expand/refine persona dataset and model fine-tuning (deferred until after validation)**

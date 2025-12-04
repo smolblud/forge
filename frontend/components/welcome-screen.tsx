@@ -9,14 +9,10 @@ interface WelcomeScreenProps {
 export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center px-6 relative overflow-hidden">
-      {/* Background gradients */}
-      <div className="absolute top-0 left-1/4 w-96 h-96 bg-green-900/20 rounded-full blur-3xl" />
-      <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-emerald-900/20 rounded-full blur-3xl" />
-
       <div className="relative z-10 text-center max-w-2xl">
         <div className="flex justify-center mb-8">
-          <div className="p-3 rounded-xl glass">
-            <Leaf className="w-12 h-12 text-green-400" />
+          <div className="p-4 rounded-2xl glass-card glow-mixed">
+            <Leaf className="w-14 h-14 text-green-400" />
           </div>
         </div>
 
@@ -32,14 +28,14 @@ export default function WelcomeScreen({ onStart }: WelcomeScreenProps) {
         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-8">
           <button
             onClick={onStart}
-            className="px-8 py-4 bg-gradient-to-r from-green-500 to-emerald-500 text-black rounded-lg font-bold text-lg hover:shadow-[0_0_20px_rgba(34,197,94,0.4)] transition-all hover:scale-105"
+            className="px-8 py-4 bg-gradient-to-r from-green-500 via-emerald-500 to-cyan-500 text-black rounded-xl font-bold text-lg hover:shadow-[0_0_40px_rgba(34,197,94,0.5),0_0_80px_rgba(6,182,212,0.3)] transition-all duration-300 hover:scale-105"
           >
             Start Writing
           </button>
         </div>
 
         <div className="flex items-center justify-center gap-2 text-sm text-green-400/70">
-          <div className="w-2 h-2 rounded-full bg-green-500" />
+          <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
           <span>All processing is local and private</span>
         </div>
       </div>

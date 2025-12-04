@@ -20,6 +20,14 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={cn("min-h-screen bg-black font-sans antialiased selection:bg-green-900/30", inter.variable)}>
+        {/* Animated gradient background */}
+        <div className="bg-gradient-orbs">
+          <div className="orb-green" />
+          <div className="orb-cyan" />
+          <div className="orb-emerald" />
+        </div>
+        {/* Halftone texture overlay */}
+        <div className="bg-halftone" />
         {children}
       </body>
     </html>

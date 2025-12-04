@@ -25,9 +25,11 @@ class AgentCCoach:
     async def critique(self, user_text, tips):
         prompt = self.synthesize_prompt(user_text, tips)
         response = await self.llm.ainvoke(prompt)
-        if not self.check_guardrails(user_text, response):
+        # Handle response - could be a string or AIMessage
+        response_text = response if isinstance(response, str) else str(response)
+        if not self.check_guardrails(user_text, response_text):
             return "[Blocked: Output too similar to user text. Rewrite attempt detected.]"
-        return response
+        return response_text
 # --- Agent B: Librarian ---
 class AgentBLibrarian:
     def __init__(self, retriever):
@@ -53,6 +55,7 @@ class AgentBLibrarian:
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import JSONResponse
+from fastapi.middleware.cors import CORSMiddleware
 from app.rag import get_rag_chain, Chroma, Ollama
 import uvicorn
 import re
@@ -80,6 +83,15 @@ class AgentAPlanner:
 
 app = FastAPI(title="Forge AI Writing Coach")
 
+# Add CORS middleware to allow frontend to connect
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
 # Initialize dependencies for agents
 try:
     rag_chain = get_rag_chain()
@@ -106,26 +118,60 @@ except Exception as e:
     librarian = None
     coach = None
 
-@app.post("/critique")
-async def critique(request: Request):
+@app.get("/")
+async def root():
+    """Health check endpoint"""
+    return {"status": "ok", "message": "Forge AI Writing Coach API is running"}
+
+@app.get("/health")
+async def health():
+    """Detailed health check"""
+    return {
+        "status": "ok",
+        "agents": {
+            "planner": planner is not None,
+            "librarian": librarian is not None,
+            "coach": coach is not None
+        }
+    }
+
+
+# Unified submit endpoint: handles both questions and critique
+@app.post("/submit")
+async def submit(request: Request):
     data = await request.json()
     user_text = data.get("text", "")
     if not (planner and librarian and coach):
         return JSONResponse({"error": "Agentic flow not initialized."}, status_code=500)
     if not user_text:
         return JSONResponse({"error": "No text provided."}, status_code=400)
+
     # Step 1: Plan
     plan = planner.plan(user_text)
+    classification = plan.get("classification")
     dimensions = plan.get("dimensions", [])
-    # Step 2: Retrieve tips
-    tips = librarian.retrieve_tips(dimensions)
-    # Step 3: Critique
-    critique_text = await coach.critique(user_text, tips)
-    return JSONResponse({
-        "plan": plan,
-        "tips": tips,
-        "critique": critique_text
-    })
+
+    if classification == "question":
+        # For short input, just ask the LLM for advice/questions
+        prompt = (
+            "You are a writing coach. Strictly do NOT rewrite or summarize user text. Only provide critique, questions, and advice.\n"
+            f"User Query:\n{user_text}\n\nRespond with advice or questions only."
+        )
+        response = await coach.llm.ainvoke(prompt)
+        response_text = response if isinstance(response, str) else str(response)
+        return JSONResponse({
+            "plan": plan,
+            "response": response_text
+        })
+    else:
+        # For long input, run full agentic critique flow
+        tips = librarian.retrieve_tips(dimensions)
+        critique_text = await coach.critique(user_text, tips)
+        return JSONResponse({
+            "plan": plan,
+            "tips": tips,
+            "critique": critique_text
+        })
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=False, loop="asyncio")
