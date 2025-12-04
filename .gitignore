@@ -22,4 +22,4 @@ debug_*.py
 data/raw_scraped_data/
 data/guides.json
 frontend/node_modules/
-
+frontend/.next/
