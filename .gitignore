@@ -21,5 +21,6 @@ debug_*.py
 .github/copilot-instructions.md
 data/raw_scraped_data/
 data/guides.json
+data/forge.db
 frontend/node_modules/
 frontend/.next/
