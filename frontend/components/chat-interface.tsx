@@ -6,8 +6,7 @@ import { useState, useRef, useEffect } from "react"
 import { Send, AlertCircle, Leaf } from "lucide-react"
 import CritiqueResult from "@/components/critique-result"
 import MarkdownRenderer from "@/components/markdown-renderer"
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000"
+import { submitMessage, getChat } from "@/lib/api"
 
 interface Message {
   id: string
@@ -26,7 +25,12 @@ interface CritiqueData {
   critique: string
 }
 
-export default function ChatInterface() {
+interface ChatInterfaceProps {
+  conversationId: number | null
+  onNewChat: () => void
+}
+
+export default function ChatInterface({ conversationId, onNewChat }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
@@ -42,14 +46,45 @@ export default function ChatInterface() {
     scrollToBottom()
   }, [messages])
 
+  // Load chat history
+  useEffect(() => {
+    if (conversationId) {
+      loadChatHistory(conversationId)
+    } else {
+      setMessages([])
+    }
+  }, [conversationId])
+
+  const loadChatHistory = async (id: number) => {
+    try {
+      setIsLoading(true)
+      const chat = await getChat(id)
+      if (chat.messages) {
+        const formattedMessages: Message[] = chat.messages.map((msg: any) => ({
+            id: msg.id.toString(),
+            type: msg.role === "assistant" ? "coach" : "user",
+            content: msg.content, // Note: Backend currently stores string content. If it was a critique, it's stored as string.
+            // Ideally we should store structured data or parse it.
+            // For now, let's assume it's text. If we want to restore critique UI for history, we'd need to store that metadata.
+            // Given the constraints, we'll display history as text/markdown.
+            timestamp: new Date(msg.created_at)
+        }))
+        setMessages(formattedMessages)
+      }
+    } catch (error) {
+      console.error("Failed to load chat", error)
+      setError("Failed to load chat history")
+    } finally {
+      setIsLoading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setError(null)
 
     const text = input.trim()
     if (!text) return
-
-
 
     // Add user message
     const userMessage: Message = {
@@ -61,23 +96,10 @@ export default function ChatInterface() {
     setMessages((prev) => [...prev, userMessage])
     setInput("")
 
-    // Call the real API
+    // Call the API
     setIsLoading(true)
     try {
-      const response = await fetch(`${API_URL}/submit`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ text }),
-      })
-
-      if (!response.ok) {
-        const errorData = await response.json()
-        throw new Error(errorData.error || "Failed to get response")
-      }
-
-      const result = await response.json()
+      const result = await submitMessage(text, conversationId || undefined)
 
       let coachMessage: Message
       if (result.critique) {
@@ -110,16 +132,14 @@ export default function ChatInterface() {
       }
       setMessages((prev) => [...prev, coachMessage])
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to connect to the writing coach. Make sure the backend is running on port 8000.")
+      setError(err instanceof Error ? err.message : "Failed to connect to the writing coach.")
     } finally {
       setIsLoading(false)
     }
   }
 
   const handleReset = () => {
-    setMessages([])
-    setError(null)
-    setInput("")
+    onNewChat()
   }
 
   return (

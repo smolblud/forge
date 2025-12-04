@@ -1,17 +1,35 @@
 # --- Agent C: Coach ---
 import difflib
+from typing import List, Optional
+from pydantic import BaseModel
+from datetime import datetime
 
 class AgentCCoach:
     def __init__(self, llm):
         self.llm = llm
         self.system_prompt = (
-            "You are a writing coach. Strictly do NOT rewrite or summarize user text. Only provide critique, questions, and advice."
+            "You are Forge, a friendly AI writing coach. You can:\n"
+            "- Have normal conversations and answer questions about yourself\n"
+            "- Provide constructive critique on writing submissions\n"
+            "- Offer writing advice and answer writing-related questions\n\n"
+            "When users submit writing (50+ words), analyze it for Pacing, Dialogue, and Show-Don't-Tell.\n"
+            "When users ask general questions, respond naturally and helpfully.\n"
+            "NEVER rewrite user text. Only provide critique, questions, and encouragement."
         )
 
-    def synthesize_prompt(self, user_text, tips):
+    def synthesize_prompt(self, user_text, tips, history: List[dict]):
         tips_str = "\n".join([f"- {tip}" for tip in tips])
+        
+        history_str = ""
+        if history:
+            history_str = "Conversation History:\n" + "\n".join([f"{msg['role']}: {msg['content']}" for msg in history[-5:]]) + "\n\n"
+
         prompt = (
-            f"{self.system_prompt}\n\nUser Text:\n{user_text}\n\nAdvice:\n{tips_str}\n\nRespond with critique and questions only."
+            f"{self.system_prompt}\n\n"
+            f"{history_str}"
+            f"User Text:\n{user_text}\n\n"
+            f"Advice Context:\n{tips_str}\n\n"
+            "Respond appropriately based on the user's intent (conversation or critique)."
         )
         return prompt
 
@@ -22,14 +40,17 @@ class AgentCCoach:
             return False
         return True
 
-    async def critique(self, user_text, tips):
-        prompt = self.synthesize_prompt(user_text, tips)
+    async def chat(self, user_text, tips, history: List[dict]):
+        prompt = self.synthesize_prompt(user_text, tips, history)
         response = await self.llm.ainvoke(prompt)
-        # Handle response - could be a string or AIMessage
         response_text = response if isinstance(response, str) else str(response)
-        if not self.check_guardrails(user_text, response_text):
-            return "[Blocked: Output too similar to user text. Rewrite attempt detected.]"
+        
+        # Only check guardrails if it looks like a critique (long response)
+        if len(user_text) > 50 and not self.check_guardrails(user_text, response_text):
+             return "[Blocked: Output too similar to user text. Rewrite attempt detected.]"
+        
         return response_text
+
 # --- Agent B: Librarian ---
 class AgentBLibrarian:
     def __init__(self, retriever):
@@ -53,12 +74,18 @@ class AgentBLibrarian:
                 tips.append(doc.page_content)
         return tips
 
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.orm import Session
 from app.rag import get_rag_chain, Chroma, Ollama
+from app.database import engine, Base, get_db
+from app import models
 import uvicorn
 import re
+
+# Initialize Database
+models.Base.metadata.create_all(bind=engine)
 
 # --- Agent A: Planner ---
 class AgentAPlanner:
@@ -68,8 +95,16 @@ class AgentAPlanner:
 
     def classify(self, text: str):
         word_count = len(re.findall(r'\w+', text))
+        
+        # Simple heuristic for now, can be improved with LLM classification
         if word_count < 50:
-            return {"type": "question", "dimensions": []}
+            lower_text = text.lower()
+            if any(greeting in lower_text for greeting in ["hello", "hi", "hey", "greetings"]):
+                return {"type": "greeting", "dimensions": []}
+            elif "forge" in lower_text or "who are you" in lower_text or "what do you do" in lower_text:
+                return {"type": "question_about_forge", "dimensions": []}
+            else:
+                return {"type": "conversation", "dimensions": []}
         else:
             return {"type": "submission", "dimensions": self.dimensions}
 
@@ -118,6 +153,37 @@ except Exception as e:
     librarian = None
     coach = None
 
+# Pydantic Models
+class MessageBase(BaseModel):
+    role: str
+    content: str
+
+class Message(MessageBase):
+    id: int
+    created_at: datetime
+    
+    class Config:
+        from_attributes = True
+
+class ConversationBase(BaseModel):
+    title: str
+
+class ConversationCreate(ConversationBase):
+    pass
+
+class Conversation(ConversationBase):
+    id: int
+    created_at: datetime
+    updated_at: datetime
+    messages: List[Message] = []
+
+    class Config:
+        from_attributes = True
+
+class SubmitRequest(BaseModel):
+    text: str
+    conversation_id: Optional[int] = None
+
 @app.get("/")
 async def root():
     """Health check endpoint"""
@@ -135,43 +201,102 @@ async def health():
         }
     }
 
+# --- Chat Persistence Endpoints ---
 
-# Unified submit endpoint: handles both questions and critique
+@app.get("/chats", response_model=List[Conversation])
+def get_chats(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    chats = db.query(models.Conversation).order_by(models.Conversation.updated_at.desc()).offset(skip).limit(limit).all()
+    return chats
+
+@app.get("/chats/{chat_id}", response_model=Conversation)
+def get_chat(chat_id: int, db: Session = Depends(get_db)):
+    chat = db.query(models.Conversation).filter(models.Conversation.id == chat_id).first()
+    if not chat:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    return chat
+
+@app.post("/chats", response_model=Conversation)
+def create_chat(chat: ConversationCreate, db: Session = Depends(get_db)):
+    db_chat = models.Conversation(title=chat.title)
+    db.add(db_chat)
+    db.commit()
+    db.refresh(db_chat)
+    return db_chat
+
+@app.delete("/chats/{chat_id}")
+def delete_chat(chat_id: int, db: Session = Depends(get_db)):
+    chat = db.query(models.Conversation).filter(models.Conversation.id == chat_id).first()
+    if not chat:
+        raise HTTPException(status_code=404, detail="Conversation not found")
+    db.delete(chat)
+    db.commit()
+    return {"status": "success"}
+
+# --- Main Interaction Endpoint ---
+
 @app.post("/submit")
-async def submit(request: Request):
-    data = await request.json()
-    user_text = data.get("text", "")
+async def submit(request: SubmitRequest, db: Session = Depends(get_db)):
+    user_text = request.text
+    conversation_id = request.conversation_id
+
     if not (planner and librarian and coach):
         return JSONResponse({"error": "Agentic flow not initialized."}, status_code=500)
     if not user_text:
         return JSONResponse({"error": "No text provided."}, status_code=400)
+
+    # Get or create conversation
+    if conversation_id:
+        conversation = db.query(models.Conversation).filter(models.Conversation.id == conversation_id).first()
+        if not conversation:
+            # Fallback to creating new if ID invalid
+            conversation = models.Conversation(title=user_text[:30] + "...")
+            db.add(conversation)
+            db.commit()
+            db.refresh(conversation)
+    else:
+        conversation = models.Conversation(title=user_text[:30] + "...")
+        db.add(conversation)
+        db.commit()
+        db.refresh(conversation)
+    
+    conversation_id = conversation.id
+
+    # Save User Message
+    user_msg = models.Message(conversation_id=conversation_id, role="user", content=user_text)
+    db.add(user_msg)
+    db.commit()
+
+    # Retrieve History
+    history_msgs = db.query(models.Message).filter(models.Message.conversation_id == conversation_id).order_by(models.Message.created_at).all()
+    history = [{"role": m.role, "content": m.content} for m in history_msgs]
 
     # Step 1: Plan
     plan = planner.plan(user_text)
     classification = plan.get("classification")
     dimensions = plan.get("dimensions", [])
 
-    if classification == "question":
-        # For short input, just ask the LLM for advice/questions
-        prompt = (
-            "You are a writing coach. Strictly do NOT rewrite or summarize user text. Only provide critique, questions, and advice.\n"
-            f"User Query:\n{user_text}\n\nRespond with advice or questions only."
-        )
-        response = await coach.llm.ainvoke(prompt)
-        response_text = response if isinstance(response, str) else str(response)
-        return JSONResponse({
-            "plan": plan,
-            "response": response_text
-        })
-    else:
-        # For long input, run full agentic critique flow
+    # Step 2: Retrieve Tips (if needed)
+    tips = []
+    if classification == "submission":
         tips = librarian.retrieve_tips(dimensions)
-        critique_text = await coach.critique(user_text, tips)
-        return JSONResponse({
-            "plan": plan,
-            "tips": tips,
-            "critique": critique_text
-        })
+
+    # Step 3: Generate Response
+    response_text = await coach.chat(user_text, tips, history)
+
+    # Save Assistant Message
+    assistant_msg = models.Message(conversation_id=conversation_id, role="assistant", content=response_text)
+    db.add(assistant_msg)
+    
+    # Update conversation timestamp
+    conversation.updated_at = datetime.utcnow()
+    db.commit()
+
+    return JSONResponse({
+        "conversation_id": conversation_id,
+        "plan": plan,
+        "tips": tips,
+        "response": response_text
+    })
 
 if __name__ == "__main__":
     uvicorn.run("app.main:app", host="127.0.0.1", port=8000, reload=False, loop="asyncio")
