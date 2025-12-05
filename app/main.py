@@ -3,7 +3,6 @@ import difflib
 from typing import List, Optional
 from pydantic import BaseModel
 from datetime import datetime
-from langchain_core.messages import HumanMessage, AIMessage, SystemMessage
 
 class AgentCCoach:
     def __init__(self, llm):
@@ -15,36 +14,24 @@ class AgentCCoach:
             "- Offer writing advice and answer writing-related questions\n\n"
             "When users submit writing (50+ words), analyze it for Pacing, Dialogue, and Show-Don't-Tell.\n"
             "When users ask general questions, respond naturally and helpfully.\n"
-            "NEVER rewrite user text. Only provide critique, questions, and encouragement.\n"
-            "IMPORTANT: You have memory of the conversation. Reference previous messages when relevant.\n"
-            "If the user asks a follow-up question, answer it in context of what was discussed before."
+            "NEVER rewrite user text. Only provide critique, questions, and encouragement."
         )
 
-    def build_messages(self, user_text: str, tips: List[str], history: List[dict]):
-        """Build a proper chat message list for the LLM."""
-        messages = []
+    def synthesize_prompt(self, user_text, tips, history: List[dict]):
+        tips_str = "\n".join([f"- {tip}" for tip in tips])
         
-        # System message
-        system_content = self.system_prompt
-        if tips:
-            tips_str = "\n".join([f"- {tip}" for tip in tips])
-            system_content += f"\n\nWriting advice context to reference:\n{tips_str}"
-        
-        messages.append(SystemMessage(content=system_content))
-        
-        # Add conversation history (exclude the current message which is the last one)
-        # Take last 10 messages for context (5 exchanges)
-        history_to_use = history[:-1] if history else []  # Exclude current message
-        for msg in history_to_use[-10:]:
-            if msg['role'] == 'user':
-                messages.append(HumanMessage(content=msg['content']))
-            elif msg['role'] == 'assistant':
-                messages.append(AIMessage(content=msg['content']))
-        
-        # Add current user message
-        messages.append(HumanMessage(content=user_text))
-        
-        return messages
+        history_str = ""
+        if history:
+            history_str = "Conversation History:\n" + "\n".join([f"{msg['role']}: {msg['content']}" for msg in history[-5:]]) + "\n\n"
+
+        prompt = (
+            f"{self.system_prompt}\n\n"
+            f"{history_str}"
+            f"User Text:\n{user_text}\n\n"
+            f"Advice Context:\n{tips_str}\n\n"
+            "Respond appropriately based on the user's intent (conversation or critique)."
+        )
+        return prompt
 
     def check_guardrails(self, user_text, output):
         # Block if output contains large contiguous blocks of user text (>50% similarity)
@@ -53,10 +40,10 @@ class AgentCCoach:
             return False
         return True
 
-    async def chat(self, user_text: str, tips: List[str], history: List[dict]):
-        messages = self.build_messages(user_text, tips, history)
-        response = await self.llm.ainvoke(messages)
-        response_text = response.content if hasattr(response, 'content') else str(response)
+    async def chat(self, user_text, tips, history: List[dict]):
+        prompt = self.synthesize_prompt(user_text, tips, history)
+        response = await self.llm.ainvoke(prompt)
+        response_text = response if isinstance(response, str) else str(response)
         
         # Only check guardrails if it looks like a critique (long response)
         if len(user_text) > 50 and not self.check_guardrails(user_text, response_text):
@@ -91,7 +78,7 @@ from fastapi import FastAPI, HTTPException, Request, Depends
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
-from app.rag import get_rag_chain, Chroma, ChatOllama
+from app.rag import get_rag_chain, Chroma, Ollama
 from app.database import engine, Base, get_db
 from app import models
 import uvicorn
@@ -152,7 +139,7 @@ try:
         pass
     vectorstore = Chroma(persist_directory="data/chroma_db", embedding_function=embeddings) if embeddings else None
     retriever = vectorstore.as_retriever(search_kwargs={"k": 3}) if vectorstore else None
-    llm = ChatOllama(model="phi3", temperature=0.3)
+    llm = Ollama(model="phi3")
     planner = AgentAPlanner()
     librarian = AgentBLibrarian(retriever)
     coach = AgentCCoach(llm)

@@ -24,10 +24,6 @@ export default function Home() {
     setHasStarted(true)
   }
 
-  const handleConversationCreated = (id: number) => {
-    setCurrentChatId(id)
-  }
-
   return (
     <main className="flex h-screen bg-black text-white overflow-hidden">
       {hasStarted && (
@@ -43,7 +39,7 @@ export default function Home() {
         ) : (
           <ChatInterface 
             conversationId={currentChatId} 
-            onConversationCreated={handleConversationCreated}
+            onNewChat={handleNewChat}
           />
         )}
       </div>

@@ -1,12 +1,11 @@
 from langchain_community.llms import Ollama
-from langchain_community.chat_models import ChatOllama
 from langchain_community.vectorstores import Chroma
 from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnablePassthrough, RunnableParallel
 from langchain_community.embeddings import OllamaEmbeddings
 
 # Re-export for use in main.py
-__all__ = ['get_rag_chain', 'Chroma', 'Ollama', 'ChatOllama', 'OllamaEmbeddings']
+__all__ = ['get_rag_chain', 'Chroma', 'Ollama', 'OllamaEmbeddings']
 
 DB_PATH = "data/chroma_db"
 
