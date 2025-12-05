@@ -27,14 +27,15 @@ interface CritiqueData {
 
 interface ChatInterfaceProps {
   conversationId: number | null
-  onNewChat: () => void
+  onConversationCreated?: (id: number) => void
 }
 
-export default function ChatInterface({ conversationId, onNewChat }: ChatInterfaceProps) {
+export default function ChatInterface({ conversationId, onConversationCreated }: ChatInterfaceProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [input, setInput] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [activeConversationId, setActiveConversationId] = useState<number | null>(conversationId)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
@@ -48,6 +49,7 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
 
   // Load chat history
   useEffect(() => {
+    setActiveConversationId(conversationId)
     if (conversationId) {
       loadChatHistory(conversationId)
     } else {
@@ -99,7 +101,13 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
     // Call the API
     setIsLoading(true)
     try {
-      const result = await submitMessage(text, conversationId || undefined)
+      const result = await submitMessage(text, activeConversationId || undefined)
+
+      // Update conversation ID if a new one was created
+      if (result.conversation_id && result.conversation_id !== activeConversationId) {
+        setActiveConversationId(result.conversation_id)
+        onConversationCreated?.(result.conversation_id)
+      }
 
       let coachMessage: Message
       if (result.critique) {
@@ -138,10 +146,6 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
     }
   }
 
-  const handleReset = () => {
-    onNewChat()
-  }
-
   return (
     <div className="flex flex-col h-screen bg-transparent relative">
       {/* Header */}
@@ -156,14 +160,6 @@ export default function ChatInterface({ conversationId, onNewChat }: ChatInterfa
               <p className="text-xs text-cyan-400/60">Local-first writing coach</p>
             </div>
           </div>
-          {messages.length > 0 && (
-            <button
-              onClick={handleReset}
-              className="px-4 py-2 text-sm text-green-400/70 hover:text-green-400 hover:bg-green-500/10 rounded-lg transition-all duration-300 border border-transparent hover:border-green-500/30"
-            >
-              New Chat
-            </button>
-          )}
         </div>
       </div>
 
