@@ -24,5 +24,3 @@ data/guides.json
 data/forge.db
 frontend/node_modules/
 frontend/.next/
-node_modules/
-
