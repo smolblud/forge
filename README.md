@@ -1,6 +1,6 @@
 # Forge - Local-First AI Writing Coach
 
-Forge is a 100% offline, local-first AI writing coach designed to help users improve their writing through constructive critique and feedback. It uses a **"Coach, Not Ghostwriter"** philosophy—Forge will never rewrite your text, only provide critique, questions, and encouragement.
+Forge is a 100% offline, local-first AI writing coach designed to help users improve their writing through constructive critique and feedback. It uses a **"Coach, Not Ghostwriter"** philosophy, Forge will never rewrite your text, only provide critique, questions, and encouragement.
 
 The system leverages Retrieval-Augmented Generation (RAG) with a three-agent architecture (Planner, Librarian, Coach) to provide context-aware writing advice, all running locally on your machine using Ollama.
 
