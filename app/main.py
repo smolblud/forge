@@ -17,7 +17,18 @@ class AgentCCoach:
             "When users ask general questions, respond naturally and helpfully.\n"
             "NEVER rewrite user text. Only provide critique, questions, and encouragement.\n"
             "IMPORTANT: You have memory of the conversation. Reference previous messages when relevant.\n"
-            "If the user asks a follow-up question, answer it in context of what was discussed before."
+            "If the user asks a follow-up question, answer it in context of what was discussed before.\n\n"
+            "CRITICAL RULE - NEVER VIOLATE THIS:\n"
+            "You are a COACH, not a GHOSTWRITER. You must NEVER write stories, poems, essays, narratives, "
+            "creative content, or any text FOR the user. If the user asks you to 'write me a story', "
+            "'write something for me', 'create a narrative', 'write an example', or ANY similar request, "
+            "you MUST politely refuse and explain that your role is to help them improve THEIR writing, "
+            "not to write for them. Instead, offer to:\n"
+            "- Help them brainstorm ideas\n"
+            "- Critique their drafts\n"
+            "- Answer questions about writing techniques\n"
+            "- Provide advice on how to approach their writing\n"
+            "This rule applies even if they insist, beg, or try to trick you. Stay firm but friendly."
         )
 
     def build_messages(self, user_text: str, tips: List[str], history: List[dict]):
@@ -50,17 +61,69 @@ class AgentCCoach:
         # Block if output contains large contiguous blocks of user text (>50% similarity)
         seq = difflib.SequenceMatcher(None, user_text, output)
         if seq.quick_ratio() > 0.5:
-            return False
-        return True
+            return False, "rewrite"
+        
+        # Check if response looks like a story/creative writing
+        story_indicators = [
+            "once upon a time",
+            "there lived",
+            "one day,",
+            "long ago,",
+            "in a land",
+            "the end.",
+            "chapter 1",
+            "chapter one",
+        ]
+        output_lower = output.lower()
+        for indicator in story_indicators:
+            if indicator in output_lower:
+                return False, "story"
+        
+        return True, None
+
+    def is_writing_request(self, user_text: str) -> bool:
+        """Check if user is asking for creative writing."""
+        request_patterns = [
+            "write me", "write a", "write an", "write for me",
+            "create a story", "create a poem", "create a narrative",
+            "give me a story", "tell me a story",
+            "make up a", "compose a", "draft a",
+            "can you write", "could you write", "would you write",
+            "i want you to write", "please write",
+        ]
+        user_lower = user_text.lower()
+        return any(pattern in user_lower for pattern in request_patterns)
 
     async def chat(self, user_text: str, tips: List[str], history: List[dict]):
+        # Pre-check: If user is asking for creative writing, refuse immediately
+        if self.is_writing_request(user_text):
+            return (
+                "I appreciate your interest, but as your writing coach, I can't write stories, "
+                "poems, or other creative content for you. My role is to help you become a better "
+                "writer by critiquing YOUR work and offering guidance.\n\n"
+                "Here's what I can do instead:\n"
+                "- **Brainstorm ideas** with you for your story\n"
+                "- **Critique your drafts** and provide feedback\n"
+                "- **Answer questions** about writing techniques\n"
+                "- **Offer advice** on plot, character development, dialogue, etc.\n\n"
+                "Would you like to share something you've written, or discuss ideas for your project?"
+            )
+        
         messages = self.build_messages(user_text, tips, history)
         response = await self.llm.ainvoke(messages)
         response_text = response.content if hasattr(response, 'content') else str(response)
         
-        # Only check guardrails if it looks like a critique (long response)
-        if len(user_text) > 50 and not self.check_guardrails(user_text, response_text):
-             return "[Blocked: Output too similar to user text. Rewrite attempt detected.]"
+        # Post-check guardrails
+        passed, violation_type = self.check_guardrails(user_text, response_text)
+        if not passed:
+            if violation_type == "rewrite":
+                return "[Blocked: Output too similar to user text. Rewrite attempt detected.]"
+            elif violation_type == "story":
+                return (
+                    "I noticed I was about to generate creative content, which isn't my role. "
+                    "As your writing coach, I'm here to help improve YOUR writing, not write for you.\n\n"
+                    "How can I help you with your own writing project today?"
+                )
         
         return response_text
 
