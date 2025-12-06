@@ -1,77 +1,150 @@
 # Forge - Local-First AI Writing Coach
 
-Forge is a 100% offline, local-first AI writing coach designed to help users improve their writing through constructive critique and feedback. It leverages Retrieval-Augmented Generation (RAG) to provide context-aware advice based on a library of writing guides, all running locally on your machine using Ollama.
+Forge is a 100% offline, local-first AI writing coach designed to help users improve their writing through constructive critique and feedback. It uses a **"Coach, Not Ghostwriter"** philosophy—Forge will never rewrite your text, only provide critique, questions, and encouragement.
+
+The system leverages Retrieval-Augmented Generation (RAG) with a three-agent architecture (Planner, Librarian, Coach) to provide context-aware writing advice, all running locally on your machine using Ollama.
 
 ## Features
 
-*   **Local-First & Private**: Runs entirely on your device. No data leaves your machine.
-*   **AI Writing Coach**: Uses the Phi-3 model (via Ollama) to analyze text and offer improvements.
-*   **RAG-Powered**: Retrieves relevant writing advice from a local knowledge base (ChromaDB) to ground its feedback.
-*   **FastAPI Backend**: A lightweight and fast API to interact with the agent.
+- **Local-First & Private**: Runs entirely on your device. No data leaves your machine.
+- **AI Writing Coach**: Uses the Phi-3 model (via Ollama) to analyze text and offer improvements.
+- **RAG-Powered**: Retrieves relevant writing advice from a local ChromaDB knowledge base.
+- **Conversational Memory**: Maintains context across messages in the same chat session.
+- **Modern Web UI**: Beautiful Next.js frontend with real-time chat interface.
+- **Chat Persistence**: Conversations are saved locally in SQLite for future reference.
+
+## Tech Stack
+
+| Layer | Technology |
+|-------|------------|
+| **Frontend** | Next.js 15, React, Tailwind CSS, shadcn/ui |
+| **Backend** | Python 3.10+, FastAPI, LangChain |
+| **LLM** | Ollama (Phi-3 model) |
+| **Embeddings** | mxbai-embed-large (via Ollama) |
+| **Vector DB** | ChromaDB (embedded) |
+| **Database** | SQLite (chat persistence) |
 
 ## Prerequisites
 
-*   **Python 3.10+**
-*   **[Ollama](https://ollama.com/)**: Must be installed and running.
+- **Python 3.10+**
+- **Node.js 18+** (for frontend)
+- **[Ollama](https://ollama.com/)**: Must be installed and running
 
 ## Installation
 
-1.  **Clone the repository** (if applicable) or navigate to the project directory.
+### 1. Clone the Repository
 
-2.  **Create and activate a virtual environment**:
-    ```bash
-    python -m venv .venv
-    # Windows
-    .\.venv\Scripts\Activate
-    # Linux/Mac
-    source .venv/bin/activate
-    ```
+```bash
+git clone https://github.com/smolblud/forge.git
+cd forge
+```
 
-3.  **Install dependencies**:
-    ```bash
-    pip install -r requirements.txt
-    ```
+### 2. Backend Setup
 
-4.  **Pull the required Ollama models**:
-    ```bash
-    ollama pull phi3
-    ollama pull mxbai-embed-large
-    ```
+```bash
+# Create and activate a virtual environment
+python -m venv .venv
+source .venv/bin/activate  # Linux/Mac
+# .\.venv\Scripts\Activate  # Windows
 
-## Usage
+# Install Python dependencies
+pip install -r requirements.txt
+```
 
-### 1. Ingest Knowledge Base
-First, you need to populate the local vector database with writing guides.
+### 3. Pull Ollama Models
+
+```bash
+ollama pull phi3
+ollama pull mxbai-embed-large
+```
+
+### 4. Ingest Knowledge Base
+
+Populate the local vector database with writing guides:
+
 ```bash
 python app/ingest.py
 ```
 
-### 2. Start the API Server
-Run the FastAPI server.
+### 5. Frontend Setup
+
 ```bash
+cd frontend
+npm install
+```
+
+## Running the Application
+
+### Start the Backend Server
+
+```bash
+# From the project root
 python -m app.main
 ```
-The server will start at `http://127.0.0.1:8000`.
 
-### 3. Test the Agent
-You can test the endpoint using the provided script:
+The API server will start at `http://127.0.0.1:8000`.
+
+### Start the Frontend
+
 ```bash
-python test_api.py
+# From the frontend directory
+cd frontend
+npm run dev
 ```
-Or send a POST request manually:
-```bash
-curl -X POST "http://127.0.0.1:8000/critique" \
-     -H "Content-Type: application/json" \
-     -d '{"text": "He was very angry and said loudly that he wanted to leave."}'
-```
+
+The web UI will be available at `http://localhost:3000`.
+
+## Usage
+
+1. Open `http://localhost:3000` in your browser
+2. Click "Begin Your Journey" to start
+3. Paste your writing, ask questions, or chat with Forge
+4. Use the sidebar to manage and revisit previous conversations
+
+### Writing Submissions
+
+Submit 50+ words of your writing to receive structured critique on:
+- **Pacing**: Flow and rhythm of your narrative
+- **Dialogue**: Natural conversation and character voice
+- **Show-Don't-Tell**: Descriptive techniques and sensory details
+
+### Conversational Mode
+
+For shorter messages or questions, Forge will respond conversationally, answering questions about writing techniques, offering advice, or discussing your work.
 
 ## Project Structure
 
-*   `app/`: Contains the application source code.
-    *   `main.py`: FastAPI entry point.
-    *   `rag.py`: RAG pipeline implementation using LangChain.
-    *   `ingest.py`: Script to ingest data into ChromaDB.
-*   `data/`: Stores the knowledge base and vector database.
-    *   `guides.json`: Source data for writing guides.
-    *   `chroma_db/`: Persisted ChromaDB vector store.
-*   `requirements.txt`: Python dependencies.
+```
+forge/
+├── app/                    # Backend source code
+│   ├── main.py            # FastAPI application & agents
+│   ├── rag.py             # RAG pipeline (LangChain)
+│   ├── database.py        # SQLite database setup
+│   ├── models.py          # SQLAlchemy models
+│   └── ingest.py          # Knowledge base ingestion
+├── frontend/              # Next.js frontend
+│   ├── app/               # Next.js app router
+│   ├── components/        # React components
+│   └── lib/               # API utilities
+├── data/                  # Data storage
+│   ├── guides.json        # Writing guides source
+│   ├── chroma_db/         # Vector database
+│   └── forge.db           # SQLite chat database
+└── requirements.txt       # Python dependencies
+```
+
+## API Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/` | GET | Health check |
+| `/health` | GET | Detailed health status |
+| `/submit` | POST | Submit text for critique/chat |
+| `/chats` | GET | List all conversations |
+| `/chats` | POST | Create new conversation |
+| `/chats/{id}` | GET | Get conversation with messages |
+| `/chats/{id}` | DELETE | Delete conversation |
+
+## License
+
+MIT
